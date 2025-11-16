@@ -1,0 +1,115 @@
+<!--
+Nota: antes de usar, crie uma tabela no Supabase (SQL):
+
+CREATE TABLE public.notes (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  title text,
+  content text,
+  inserted_at timestamptz DEFAULT now()
+);
+
+Substitua SUPABASE_URL e SUPABASE_ANON_KEY nas variáveis abaixo.
+-->
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bloco de Notas - Supabase + Tailwind + JavaScript</title>
+    <!-- Tailwind Play CDN (rápido para protótipo) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/supabase.min.js"></script>
+  </head>
+  <body class="bg-slate-50 min-h-screen p-6">
+    <div class="max-w-3xl mx-auto">
+      <header class="mb-6">
+        <h1 class="text-3xl font-bold text-slate-800">Bloco de Notas</h1>
+        <p class="text-sm text-slate-600">
+          Simples CRUD com Supabase (segue instruções no topo do arquivo)
+        </p>
+      </header>
+
+      <main class="grid gap-6 md:grid-cols-2">
+        <!-- Form -->
+        <section class="bg-white p-4 rounded-2xl shadow">
+          <h2 class="font-semibold mb-3">Nova nota</h2>
+          <form id="note-form" class="space-y-3">
+            <input
+              id="title"
+              placeholder="Título"
+              class="w-full border rounded p-2"
+            />
+            <textarea
+              id="content"
+              placeholder="Escreva sua nota aqui..."
+              rows="6"
+              class="w-full border rounded p-2 resize-none"
+            ></textarea>
+            <div class="flex gap-2">
+              <button
+                type="submit"
+                class="px-4 py-2 bg-sky-600 text-white rounded hover:bg-sky-700"
+              >
+                Salvar
+              </button>
+              <button id="clear" type="button" class="px-4 py-2 border rounded">
+                Limpar
+              </button>
+            </div>
+          </form>
+
+          <div id="status" class="mt-3 text-sm text-slate-500"></div>
+        </section>
+
+        <!-- Lista de notas -->
+        <section class="bg-white p-4 rounded-2xl shadow">
+          <div class="flex items-center justify-between">
+            <h2 class="font-semibold">Minhas notas</h2>
+            <button id="refresh" class="text-sm px-3 py-1 border rounded">
+              Atualizar
+            </button>
+          </div>
+
+          <ul id="notes-list" class="mt-3 space-y-3">
+            <!-- notas serão injetadas aqui -->
+          </ul>
+
+          <p id="empty" class="mt-4 text-sm text-slate-500">
+            Nenhuma nota encontrada.
+          </p>
+        </section>
+      </main>
+
+      <!-- Modal simples para editar -->
+      <div
+        id="edit-modal"
+        class="fixed inset-0 bg-black/40 hidden items-center justify-center p-4"
+      >
+        <div class="bg-white p-4 rounded-xl max-w-xl w-full">
+          <h3 class="font-semibold mb-2">Editar nota</h3>
+          <input id="edit-title" class="w-full border rounded p-2 mb-2" />
+          <textarea
+            id="edit-content"
+            rows="6"
+            class="w-full border rounded p-2"
+          ></textarea>
+          <div class="mt-3 flex gap-2 justify-end">
+            <button id="cancel-edit" class="px-4 py-2 border rounded">
+              Cancelar
+            </button>
+            <button
+              id="save-edit"
+              class="px-4 py-2 bg-emerald-600 text-white rounded"
+            >
+              Salvar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="scripts/Home/index.js"></script>
+  </body>
+</html>
