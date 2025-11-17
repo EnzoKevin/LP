@@ -12,7 +12,6 @@ const emptyEl = document.getElementById("empty");
 const refreshBtn = document.getElementById("refresh");
 const clearBtn = document.getElementById("clear");
 
-// Modal
 const editModal = document.getElementById("edit-modal");
 const editTitle = document.getElementById("edit-title");
 const editContent = document.getElementById("edit-content");
@@ -20,29 +19,44 @@ const saveEditBtn = document.getElementById("save-edit");
 const cancelEditBtn = document.getElementById("cancel-edit");
 let editingId = null;
 
-// Inicial
-document.addEventListener("DOMContentLoaded", () => {
-  GetNotes();
-});
+document.addEventListener("DOMContentLoaded", loadNotes);
 
-// Eventos
+// Carrega as notas e inicia a func pra renderizar
+async function loadNotes() {
+  const notes = await GetNotes();
+  renderNotes(notes);
+}
+
+// seta o formulario de pra zero quando se e adicionado uma nova nota
+// e tambem salva a nota nova
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  console.log("Nota criada");
-  await createNote();
+  await createNote(titleInput, contentInput);
+  loadNotes();
+  titleInput.value = "";
+  contentInput.value = "";
 });
 
-refreshBtn.addEventListener("click", GetNotes());
+// recarrega as notas
+refreshBtn.addEventListener("click", loadNotes);
+
+// limpa os campos do formulario
 clearBtn.addEventListener("click", () => {
   titleInput.value = "";
   contentInput.value = "";
 });
 
+// cancela a edição de uma nota
 cancelEditBtn.addEventListener("click", () => toggleEditModal(false));
+
+// salva a edição de uma nota
 saveEditBtn.addEventListener("click", async () => {
-  await saveEdit();
+  await saveEdit(editingId, editTitle.value, editContent.value);
+  loadNotes();
+  toggleEditModal(false);
 });
 
+// abre a edição
 function openEdit(note) {
   editingId = note.id;
   editTitle.value = note.title || "";
@@ -50,13 +64,16 @@ function openEdit(note) {
   toggleEditModal(true);
 }
 
-// UI helpers
+// renderiza as notas na tela junto com o html
+// OBS: SE VOCE DEIXASSE USAR OQUE EU SEI ESSE CODIGO SERIA TAO MAIS SIMPLES E BONITO
 function renderNotes(notes) {
   notesList.innerHTML = "";
+
   if (!notes || notes.length === 0) {
     emptyEl.style.display = "block";
     return;
   }
+
   emptyEl.style.display = "none";
 
   for (const note of notes) {
@@ -67,7 +84,7 @@ function renderNotes(notes) {
     head.className = "flex items-start justify-between gap-3";
 
     const title = document.createElement("strong");
-    title.textContent = note.title || "(sem título)";
+    title.textContent = note.Titulo || "(sem título)";
     title.className = "text-slate-800";
 
     const controls = document.createElement("div");
@@ -81,7 +98,10 @@ function renderNotes(notes) {
     const delBtn = document.createElement("button");
     delBtn.textContent = "Excluir";
     delBtn.className = "text-sm px-2 py-1 border rounded text-red-600";
-    delBtn.addEventListener("click", () => deleteNote(note.id));
+    delBtn.addEventListener("click", async () => {
+      await deleteNote(note.id);
+      loadNotes();
+    });
 
     controls.appendChild(editBtn);
     controls.appendChild(delBtn);
@@ -91,29 +111,17 @@ function renderNotes(notes) {
 
     const content = document.createElement("div");
     content.className = "text-sm text-slate-600 whitespace-pre-wrap";
-    content.textContent = note.content || "";
-
-    const date = document.createElement("div");
-    date.className = "text-xs text-slate-400";
-    date.textContent = new Date(note.inserted_at).toLocaleString();
+    content.innerHTML = note.Content || "";
 
     li.appendChild(head);
     li.appendChild(content);
-    li.appendChild(date);
 
     notesList.appendChild(li);
   }
 }
 
+// deixa visivel ou não o modal de edição
 function toggleEditModal(show) {
   editModal.classList.toggle("hidden", !show);
-  if (show) editModal.style.display = "flex";
-  else editModal.style.display = "none";
-}
-
-function status(text, isError = false) {
-  statusEl.textContent = text || "";
-  statusEl.className = isError
-    ? "mt-3 text-sm text-red-600"
-    : "mt-3 text-sm text-slate-500";
+  editModal.style.display = show ? "flex" : "none";
 }

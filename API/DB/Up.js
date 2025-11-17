@@ -1,20 +1,44 @@
-import { supabase } from "../SupaBase/config";
-async function saveEdit() {
-  const title = editTitle.value.trim();
-  const content = editContent.value.trim();
-  if (!editingId) return;
-  const { error } = await supabase
-    .from("TB_LP")
-    .update({ title, content })
-    .eq("id", editingId);
+import { API_URL, API_KEY } from "../SupaBase/config.js";
 
-  if (error) {
-    console.error(error);
+/**
+ * Salva a edição da nota no banco de dados do supabase
+ *
+ * recebe o Id, Titulo e Conteudo
+ *
+ * @author Enzo Kevin Morais Rocha
+ *
+ * @param {editID} - Id do input
+ * @param {editTitle} - titulo do input
+ * @param {ContentInput} - conteudo do input
+ *
+ * @returns {String} - retorna console.log de sucesso
+ **/
+
+async function saveEdit(editID, editTitle, editContent) {
+  const title = editTitle;
+  const content = editContent;
+
+  if (!editID) return;
+
+  const res = await fetch(`${API_URL}/TB_LP?id=eq.${editID}`, {
+    method: "PATCH",
+    headers: {
+      apikey: API_KEY,
+      Authorization: `Bearer ${API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      Titulo: title,
+      Content: content,
+    }),
+  });
+
+  if (!res.ok) {
+    console.error("Erro ao atualizar:", await res.text());
     return;
   }
 
-  toggleEditModal(false);
-  fetchNotes();
+  return console.log("Nota atualizada com sucesso!");
 }
 
 export { saveEdit };

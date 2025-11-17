@@ -1,23 +1,44 @@
-import { supabase } from "../SupaBase/config";
+import { API_URL, API_KEY } from "../SupaBase/config.js";
+import { GetNotes } from "./Get.js";
 
-async function createNote() {
-  const title = titleInput.value.trim();
-  const content = contentInput.value.trim();
+/**
+ * Cria a nota no banco de dados do supabase
+ *
+ * recebe o Titulo e Conteudo
+ *
+ * @author Enzo Kevin Morais Rocha
+ *
+ * @param {TitleInput} - titulo do input
+ * @param {ContentInput} - conteudo do input
+ *
+ * @returns {GetNotes} - retorna a lista atualizada de notas
+ **/
 
-  const { data, error } = await supabase
-    .from("TB_LP")
-    .insert({ title, content })
-    .select()
-    .single();
+async function createNote(titleInput, contentInput) {
+  const Titulo = titleInput.value;
+  const content = contentInput.value;
 
-  if (error) {
-    console.error(error);
+  const res = await fetch(`${API_URL}/TB_LP`, {
+    method: "POST",
+    headers: {
+      apikey: API_KEY,
+      Authorization: `Bearer ${API_KEY}`,
+      "Content-Type": "application/json",
+      Prefer: "return=representation",
+    },
+    body: JSON.stringify({
+      Titulo: Titulo,
+      Content: content,
+    }),
+  });
+
+  if (!res.ok) {
+    console.log(Titulo, content);
+    console.error("Erro ao criar nota:", await res.text());
     return;
   }
 
-  titleInput.value = "";
-  contentInput.value = "";
-  return fetchNotes();
+  return GetNotes();
 }
 
 export { createNote };
